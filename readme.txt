@@ -2,7 +2,7 @@ README.TXT
 
 Lukas Saul, Feb. 19, 2006
 
-This file contains information about java programs constructed to analyze IBEX-LO TOF data.  These programs were written in 2006 and 2007.  Please contact me directly with any further questions:   lukas.saul@unh.edu.
+This file contains information about java programs constructed to analyze IBEX-LO TOF data.  These programs were mostly written in 2006 and 2007, with additions through 2012.  Please contact me directly with any further questions via github.  
 
 
 
