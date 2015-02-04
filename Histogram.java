@@ -20,13 +20,7 @@ public class Histogram {
 		label = new float[0];
 	}
 
-
-
 	// a given histogram is made with one of these constructors
-
-	public Histogram(double _bottom, double _top, int _numberOfBins) {
-		this((float)_bottom, (float)_top, _numberOfBins);
-	}
 	public Histogram(float _bottom, float _top, int _numberOfBins) {
 		//System.out.println("creating new histogram with numBins");
 		top = _top;
@@ -71,13 +65,6 @@ public class Histogram {
 	}
 
 	// a given histogram will only call one of these addEvent guys!!!  So don't worry about currentBin!!
-
-	public void addEvent(double evt) {
-		addEvent((float)evt);
-	}
-	public void addEvent(double evt, int count) {
-		addEvent((float)evt, count);
-	}
 	public void addEvent(float evt) {
 		boolean added = false;
 		if ( (evt >= label[currentBin]) && (evt <= label[currentBin]+binWidth) ) {
@@ -89,26 +76,6 @@ public class Histogram {
 				if ( (evt >= label[i]) && (evt <= label[i]+binWidth) ) {
 					currentBin = i;
 					data[currentBin]++;
-					added = true;
-					i = numberOfBins;
-				}
-			}
-		}
-		if (!added) {
-			//System.out.println("couldn't add date to time profile : " + evt);
-		}
-	}
-	public void addEvent(float evt, int count) {
-		boolean added = false;
-		if ( (evt >= label[currentBin]) && (evt <= label[currentBin]+binWidth) ) {
-			data[currentBin]+= count;
-			added = true;
-		}
-		else {
-			for (int i=0; i<numberOfBins; i++) {
-				if ( (evt >= label[i]) && (evt <= label[i]+binWidth) ) {
-					currentBin = i;
-					data[currentBin]+= count;
 					added = true;
 					i = numberOfBins;
 				}
@@ -151,57 +118,17 @@ public class Histogram {
 		}
 	}
 
-	public double[] getArray() {
-		double[] tbr = new double[data.length];
+	public long[] getArray() {
+		long[] tbr = new long[data.length];
 		for (int i=0; i<tbr.length; i++) {
-			tbr[i] = (double)data[i];
+			tbr[i] = (long)data[i];
 		}
 		return tbr;
 	}
 
-	public double[] getLabelsRange(double min, double max) {
-		int count = 0;
-		for (int i=0; i<label.length; i++) {
-			if(label[i]>min && label[i]<max) count++;
-		}
-		double [] labelR = new double[count];
-		int index = 0;
-		for (int i=0; i<label.length; i++) {
-			if(label[i]>min && label[i]<max) {
-				labelR[index]=label[i];
-				index++;
-			}
-		}
-		return labelR;
-	}
-
-	public double[] getDatasRange(double min, double max) {
-		int count = 0;
-		for (int i=0; i<label.length; i++) {
-			if(label[i]>min && label[i]<max) count++;
-		}
-		double [] dataR = new double[count];
-		int index = 0;
-		for (int i=0; i<label.length; i++) {
-			if(label[i]>min && label[i]<max) {
-				dataR[index]=data[i];
-				index++;
-			}
-		}
-		System.out.println("DataR sample: ");
-		for (int i=0; i<dataR.length; i++) {
-			System.out.println(dataR[i]);
-		}
-		return dataR;
-	}
-
-	public int getSum(double min, double max) {
-		int count = 0;
-		for (int i=0; i<label.length; i++) {
-			if(label[i]>min && label[i]<max) count+= data[i];
-		}
-		return count;
-	}
+	/**
+	* for simple 2 column histogram data reading and histogramming, use this puppy
+	*/
 
 }
 

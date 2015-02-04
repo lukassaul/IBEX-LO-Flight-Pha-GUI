@@ -27,7 +27,7 @@ import java.awt.print.*;
 import java.awt.image.*;
 
 
-//import net.jmge.gif.*;
+import net.jmge.gif.*;
 
 import java.awt.*;
 import javax.swing.*;
@@ -49,8 +49,6 @@ import javax.imageio.*;
 public class JColorGraph extends PrintableDialog implements ActionListener{
   public JPlotLayout rpl_;
   public JPane gridKeyPane;
-  public String xLabel = "";
-  public String yLabel = "";
   private GridAttribute gridAttr_;
   JButton edit_;
   JButton space_ = null;
@@ -63,12 +61,11 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
   ContourLevels clevels;
   ColorMap cmap;
   SGTData newData;
-  public String fileName ="test";
 
   // defaults
-  private String unitString = "Counts";
-  private String label1 = "University of Bern";
-  private String label2 = "Neutralizer";
+  private String unitString = "Diff. EFlux (1/cm^2/s/sr)";
+  private String label1 = "SOHO CTOF HE+";
+  private String label2 = "1996";
 
   public double[] xValues;
   public double[] yValues;
@@ -98,7 +95,7 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 		yMax = (float)yValues[0]; yMin = (float)yValues[0];
 		zMax = (float)zValues[0]; zMin = (float)zValues[0];
 
-		//o("xMin: " + xMin);
+		o("xMin: " + xMin);
 
 		for (int i=0; i<xValues.length; i++) {
 			if (xValues[i]<xMin) xMin = (float)xValues[i];
@@ -115,10 +112,8 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 
 		o("xmin: " + xMin);
 		o("xmax: " + xMax);
-		o("ymin: " + yMin);
-		o("ymax: " + yMax);
 
-		cMin = zMin; cMax = zMax; cDelta = (zMax-zMin)/2;
+		cMin = zMin; cMax = zMax; cDelta = (zMax-zMin)/6;
 
 		datar = new Range2D(zMin, zMax, cDelta);
 		clevels = ContourLevels.getDefault(datar);
@@ -164,21 +159,8 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 	*/
 	 public void showIt() {
 		 frame.setVisible(true);
-
-      //try {
-      	//Thread.sleep(3000);
-			//BufferedImage ii = getImage();
-			//String s = JOptionPane.showInputDialog("enter file name");
-			//ImageIO.write(ii,"png",new File(fileName+".png"));
-			//System.exit(0);
-		//}
-		//catch (Exception e) {
-		//	e.printStackTrace();
-		//}
-
- 	}
+	 }
 	 private JFrame frame = null;
-
 
  public void run() {
       /*
@@ -230,8 +212,6 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
        * modified since batching was turned on.
        */
       rpl_.setBatch(false);
-
-
   }
 
   void edit_actionPerformed(java.awt.event.ActionEvent e) {
@@ -281,9 +261,9 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 		//		  TestData.SINE_RAMP, 12.0f, 30.f, 5.0f);
 		//newData = td.getSGTData();
 
-		sg = new SimpleGrid(zValues, xValues, yValues, "Quantar");
-		sg.setXMetaData(new SGTMetaData(xLabel, ""));
-		sg.setYMetaData(new SGTMetaData(yLabel, ""));
+		sg = new SimpleGrid(zValues, xValues, yValues, "Title");
+		sg.setXMetaData(new SGTMetaData("DOY", "days"));
+		sg.setYMetaData(new SGTMetaData("V/Vsw", "1"));
 		sg.setZMetaData(new SGTMetaData(unitString, ""));
 
 		//	newData.setKeyTitle(new SGLabel("a","test",new Point2D.Double(0.0,0.0)) );
@@ -477,7 +457,7 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 			System.out.println(s);
 	}
 
-	/*private void writeNormalGIF(Image img,
+	private void writeNormalGIF(Image img,
 					  String annotation,
 					  int transparent_index,  // pass -1 for none
 					  boolean interlaced,
@@ -487,7 +467,7 @@ public class JColorGraph extends PrintableDialog implements ActionListener{
 		gifenc.setTransparentIndex(transparent_index);
 		gifenc.getFrameAt(0).setInterlaced(interlaced);
 		gifenc.encode(out);
-  	}*/
+  	}
 
   	/**
   	*  Use this to set the labels that will appear on the graph when you call "run()".

@@ -23,27 +23,27 @@ import java.util.*;
 *      that uses legendre polynomials for pitch angle diffusion.  see SemiModel.java
 *      March, 2006
 *
-*   -- 2010 fitting to He cal data in O, + some additional H peak with Gaussian..
+*
 */
 public class CurveFitter implements MinimisationFunction {
 
     public static final int STRAIGHT_LINE=0,POLY2=1,POLY3=2,POLY4=3,
 		EXPONENTIAL=4,POWER=5,LOG=6,RODBARD=7,GAMMA_VARIATE=8,
 		LOG2=9, STEP=10, HEMISPHERIC=11, HTEST=12, QUAD_ORIGIN=13, GAUSSIAN=14,
-		SEMI=15, DM=16, MM=17, EMG = 18, THREE_SPECIES_FIT=19, HE_FIT=20	;
+		SEMI=15, DM=16, MM=17, EMG = 18, THREE_SPECIES_FIT=19;
 
     public static final String[] fitList = {"Straight Line","2nd Degree Polynomial",
     	"3rd Degree Polynomial", "4th Degree Polynomial","Exponential","Power",
     	"log","Rodbard", "Gamma Variate", "y = a+b*ln(x-c)", "Step Function",
     	"Hemispheric", "H-test", "Quadratic Through Origin","Gaussian","Semi","Double Maxwell",
-    	"Mirror Maxwell","Exponentially Modified Gaussian","Three Species Fit", "Helium Fit"};
+    	"Mirror Maxwell","Exponentially Modified Gaussian","Three Species Fit"};
 
     public static final String[] fList = {"y = a+bx","y = a+bx+cx^2",
     	"y = a+bx+cx^2+dx^3", "y = a+bx+cx^2+dx^3+ex^4","y = a*exp(bx)","y = ax^b",
     	"y = a*ln(bx)", "y = d+(a-d)/(1+(x/c)^b)", "y = a*(x-b)^c*exp(-(x-b)/d)",
     	"y = a+b*ln(x-c)", "y = a*step(x-b)", "y=hem.f(a,x)",
     	"y = norm*step()..","y=ax+bx^2", "y=a*EXP(-(x-b)^2/c)","y=semi.f(a,b,x)","y=dm","y=mm","y=EMG(a,b,c,d,x)",
-    	"y=a*H+b*C+c*O","y=a*He"};
+    	"y=a*H+b*C+c*O"};
 
     private static final double root2 = Math.sqrt(2); // square root of 2
 
@@ -53,7 +53,6 @@ public class CurveFitter implements MinimisationFunction {
 	public double[] bestParams; // take this after doing exhaustive for the answer
 	//public Hemispheric hh;
 	//public SemiModel sm;
-	public HeSputterFunction hsf;
 
 	public double[] start, step;
 	public double ftol;
@@ -93,7 +92,6 @@ public class CurveFitter implements MinimisationFunction {
     public void doFit(int fitType) {
 
 		fit = fitType;
-		if (fit == HE_FIT) hsf = new HeSputterFunction("o64_he_b1_tof2.txt",300);
         //if (fit == HEMISPHERIC) hh=new Hemispheric();
         //if (fit == SEMI) sm = new SemiModel();
        // if (fit == DM) {
@@ -408,9 +406,6 @@ public class CurveFitter implements MinimisationFunction {
             	start[1] = 3300;
             	start[2] = 2500;
             	break;
-            case HE_FIT:
-            	start[0] = 1000;
-
             default:
             	break;
         }
@@ -439,7 +434,6 @@ public class CurveFitter implements MinimisationFunction {
             case MM: return 3;
             case EMG: return 4;
             case THREE_SPECIES_FIT: return 3;
-            case HE_FIT: return 1;
         }
         return 0;
     }
@@ -525,10 +519,6 @@ public class CurveFitter implements MinimisationFunction {
 
        					+p[2]/2/6.83*Math.exp(2.21*2.21/2/6.83/6.83/6.83 + (70.06-x)/6.83)
        							*( erf((x-70.06)/root2/2.21-2.21/root2/6.83) + 6.83/Math.abs(6.83));
-
-            case HE_FIT:
-            	return p[0]*hsf.getSpec(x);
-
             default:
                 return 0.0;
         }
@@ -575,6 +565,27 @@ public class CurveFitter implements MinimisationFunction {
 		return index;
     }
 
+
+    /**
+    *  Here's the exponentially modified gaussian we need
+    *
+    */
+    public static double emg(double y0, double A, double xc, double w, double t0, double x) {
+
+		double z = (x-xc)/w - w/t0;
+		double s2 = Math.sqrt(2.0);
+		return y0 + A/t0*Math.exp(w*w/2.0/t0/t0- (x-xc)/t0)*(0.5+0.5*erf(z/s2));
+
+
+
+		// old version
+		//return p[0]/2/p[3]*Math.exp(p[2]*p[2]/2/p[3]/p[3]/p[3] + (p[1]-x)/p[3])
+       	//						*( erf((x-p[1])/root2/p[2]-p[2]/root2/p[3]) + p[3]/Math.abs(p[3]));
+
+
+	}
+
+
     /**
     *
 	*  Reference: Chebyshev fitting formula for erf(z) from
@@ -613,11 +624,35 @@ public class CurveFitter implements MinimisationFunction {
     public static final void main(String[] args) {
 		int linesToSkip = 0;
 
+
+		// lets test erfc and then test EMG
+
+		// erf is tested now and works
+
+		file f = new file("erftest.txt");
+		f.initWrite(false);
+
+		// set some params
+		double A = 1.0;
+		double y0 = 0.0;
+		double xc = 0.0;
+		double w = 1.0;
+		double t0 = 1.0;
+
+		for (double i=-1.0; i<2; i+=0.01) {
+
+			f.write(i+"\t"+emg(y0,A,xc,w,t0,i)+"\n");
+		}
+		f.closeWrite();
+
+
+
+
 		//double[] x = {0,1,2,3,4,5,6,7,8,9};
 		//double[] y = {1,3,5,7,9,11,13,15,17,19};
 		//CurveFitter cf = new CurveFitter(x,y);
 		//cf.doFit(CurveFitter.STRAIGHT_LINE);
-
+/*
 		file f = new file(args[0]);
 		int numLines = f.readStuffNumLines();
 		f.initRead();
@@ -634,14 +669,17 @@ public class CurveFitter implements MinimisationFunction {
 			StringTokenizer st = new StringTokenizer(line);
 			x[i]=Double.parseDouble(st.nextToken());
 			y[i]=Double.parseDouble(st.nextToken());
-			//if (y[i]==0.0) y[i]=1.0;
 			System.out.println("row: " + i + " x: " + x[i] + " y: " + y[i]);
 		}
 		f.closeRead();
 
 		CurveFitter cf = new CurveFitter(x,y);
-		cf.doFit(CurveFitter.HE_FIT);
+		cf.doFit(CurveFitter.THREE_SPECIES_FIT);
 		//cf.doFit(CurveFitter.EMG);
+
+*/
+
+
 
 		/*   // USE THIS FOR EXHAUSTIVE FITTING
 
